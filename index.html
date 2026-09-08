@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MapaBus Faculdade • Multiônibus V9</title>
-  <link rel="stylesheet" href="style.css?v=theme1">
+  <link rel="stylesheet" href="style.css?v=mobileClean2">
   <script>
     (function(){
       try{
@@ -41,6 +41,14 @@
       <button class="btn btn-primary" onclick="exportBackup()">Exportar backup</button>
     </div>
   </header>
+
+  <div id="seatMoveBar" class="seat-move-bar" hidden>
+    <div class="seat-move-bar-text">
+      <strong id="seatMoveBarTitle">Mover passageiro</strong>
+      <span id="seatMoveBarHint">Toque na poltrona de destino.</span>
+    </div>
+    <button type="button" class="seat-move-cancel" onclick="cancelSeatMove()">Cancelar</button>
+  </div>
 
   <main class="container">
     <div class="trip-bar card" style="padding:14px">
@@ -393,6 +401,6 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="script.js?v=theme1"></script>
+<script src="script.js?v=mobileClean2"></script>
 </body>
 </html>

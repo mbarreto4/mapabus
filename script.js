@@ -676,6 +676,7 @@ let isDraggingWaiting = false;
 let suppressSeatClickUntil = 0;
 let touchDragTargetSeat = null;
 let touchDragTargetWaitingId = null;
+let mobileMoveSourceSeat = null;
 
 function clearSeatDropHighlights(){
   document.querySelectorAll(".seat.drop-target,.seat.dragging,.seat.drop-invalid,.seat.drop-swap,.seat.drop-waiting").forEach(el=>{
@@ -708,6 +709,87 @@ function movePassengerBetweenSeats(fromSeat,toSeat){
     renderAll();
     toast(`${source.name} movido para a poltrona ${String(toSeat).padStart(2,"0")}.`);
   }
+  return true;
+}
+
+
+function updateSeatMoveBar(){
+  const bar=document.getElementById("seatMoveBar");
+  if(!bar) return;
+  const title=document.getElementById("seatMoveBarTitle");
+  const hint=document.getElementById("seatMoveBarHint");
+
+  if(mobileMoveSourceSeat===null){
+    bar.hidden=true;
+    document.body.classList.remove("seat-move-active");
+    return;
+  }
+
+  const p=passengerBySeat(mobileMoveSourceSeat);
+  if(!p){
+    mobileMoveSourceSeat=null;
+    bar.hidden=true;
+    document.body.classList.remove("seat-move-active");
+    return;
+  }
+
+  bar.hidden=false;
+  document.body.classList.add("seat-move-active");
+  if(title) title.textContent=`Mover ${p.name}`;
+  if(hint) hint.textContent=`Poltrona ${String(mobileMoveSourceSeat).padStart(2,"0")} selecionada • toque no destino`;
+}
+
+function startSeatMove(seat){
+  seat=Number(seat);
+  const p=passengerBySeat(seat);
+  if(!p) return;
+
+  mobileMoveSourceSeat=seat;
+  closeSeatModal();
+  renderAll();
+  updateSeatMoveBar();
+
+  setTimeout(()=>{
+    const bus=document.querySelector(".bus-wrap");
+    if(bus) bus.scrollIntoView({behavior:"smooth",block:"center"});
+  },40);
+
+  toast(`${p.name} selecionado. Agora toque na poltrona de destino.`);
+}
+
+function cancelSeatMove(){
+  mobileMoveSourceSeat=null;
+  clearSeatDropHighlights();
+  updateSeatMoveBar();
+  renderSeatMap();
+}
+
+function handleSeatMoveTap(targetSeat){
+  if(mobileMoveSourceSeat===null) return false;
+
+  const fromSeat=Number(mobileMoveSourceSeat);
+  const toSeat=Number(targetSeat);
+
+  if(fromSeat===toSeat){
+    cancelSeatMove();
+    return true;
+  }
+
+  const source=passengerBySeat(fromSeat);
+  if(!source){
+    cancelSeatMove();
+    return true;
+  }
+
+  const target=passengerBySeat(toSeat);
+  if(target){
+    const ok=confirm(`A poltrona ${String(toSeat).padStart(2,"0")} está ocupada por ${target.name}.\n\nDeseja trocar ${source.name} e ${target.name} de poltrona?`);
+    if(!ok) return true;
+  }
+
+  mobileMoveSourceSeat=null;
+  updateSeatMoveBar();
+  movePassengerBetweenSeats(fromSeat,toSeat);
   return true;
 }
 
@@ -845,6 +927,15 @@ function makeSeat(n,direction){
     b.addEventListener("touchcancel",finishTouchDrag,{passive:true});
   }
 
+  if(mobileMoveSourceSeat!==null){
+    if(Number(n)===Number(mobileMoveSourceSeat)){
+      b.classList.add("move-source");
+    }else{
+      b.classList.add("move-target");
+      if(passengerBySeat(n)) b.classList.add("move-target-occupied");
+    }
+  }
+
   b.addEventListener("dragover", e=>{
     if(draggedWaitingId!==null){
       e.preventDefault();
@@ -891,6 +982,7 @@ function makeSeat(n,direction){
 
   b.onclick = () => {
     if(isDraggingSeat || isDraggingWaiting || Date.now()<suppressSeatClickUntil) return;
+    if(handleSeatMoveTap(n)) return;
     openSeatModal(n);
   };
   return b;
@@ -1525,6 +1617,7 @@ function renderAll(){
   renderTable();
   fillSeatOptions();
   updateUndoUI();
+  updateSeatMoveBar();
 }
 
 function fillSeatOptions(selected){
@@ -1727,6 +1820,7 @@ function openSeatModal(n){
         <button class="btn btn-danger" ${usesDirection?'':'disabled'} onclick="setPassengerStatus('${p.id}','${direction}','absent');closeSeatModal()">
           ${direction==="ida" ? "Não vai / faltou" : "Não volta"}
         </button>
+        <button class="btn btn-move-seat" onclick="startSeatMove(${n})">Mover para outra poltrona</button>
         <button class="btn btn-outline" onclick="closeSeatModal();editPassenger('${p.id}')">Editar cadastro</button>
         <button class="btn btn-warning" onclick="movePassengerToWaiting('${p.id}')">Remover da poltrona</button>
         <button class="btn btn-danger" onclick="closeSeatModal();deletePassenger('${p.id}')">Excluir aluno</button>

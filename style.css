@@ -2176,3 +2176,447 @@ html[data-theme="dark"] .toast{
     grid-column:1/-1;
   }
 }
+
+
+/* =====================================================
+   MAPABUS • MODO MOBILE LIMPO
+   ===================================================== */
+
+.btn-move-seat{
+  background:linear-gradient(135deg,#2457e6 0%,#507cff 100%);
+  color:#fff;
+  border:none;
+}
+
+/* Barra do modo mover */
+.seat-move-bar{
+  position:fixed;
+  left:50%;
+  bottom:max(12px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:180;
+  width:min(560px,calc(100% - 24px));
+  padding:10px 10px 10px 13px;
+  border-radius:16px;
+  background:#17233a;
+  color:#fff;
+  box-shadow:0 16px 40px rgba(0,0,0,.28);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.seat-move-bar[hidden]{display:none!important}
+.seat-move-bar-text{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.seat-move-bar-text strong{
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.seat-move-bar-text span{
+  color:#bfcbe1;
+  font-size:9px;
+  line-height:1.3;
+}
+.seat-move-cancel{
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:10px;
+  font-weight:900;
+}
+
+/* Destino visual de movimentação */
+.seat.move-source{
+  outline:3px solid #2457e6!important;
+  outline-offset:2px;
+  box-shadow:0 0 0 6px rgba(36,87,230,.14)!important;
+  transform:translateY(-2px);
+}
+.seat.move-target{
+  cursor:pointer;
+  border-style:dashed!important;
+  border-color:#4b74dd!important;
+}
+.seat.move-target::after{
+  content:"TOCAR";
+  position:absolute;
+  right:3px;
+  top:3px;
+  padding:2px 4px;
+  border-radius:5px;
+  background:#2457e6;
+  color:#fff;
+  font-size:6px;
+  font-weight:950;
+  letter-spacing:.03em;
+}
+.seat.move-target-occupied::after{
+  content:"TROCAR";
+  background:#8056b8;
+}
+.seat{position:relative}
+
+/* Mobile: menos informação na tela */
+@media(max-width:700px){
+  /* Cabeçalho compacto */
+  header{
+    gap:9px!important;
+    padding:11px 10px!important;
+  }
+  .brand p{display:none!important}
+  .brand h1{font-size:18px!important}
+  .bus-icon{display:none!important}
+  .bus-switcher{
+    padding:8px!important;
+    border-radius:12px!important;
+  }
+  .bus-switcher-title{
+    min-width:0!important;
+  }
+  .bus-switcher-labels small{display:none}
+  .bus-switcher-labels strong{font-size:12px}
+  .bus-switcher-controls{
+    grid-template-columns:1fr 1fr 1fr!important;
+  }
+  .bus-select{
+    grid-column:1/-1!important;
+    height:40px!important;
+  }
+  .bus-action-btn{
+    height:36px!important;
+    padding:0 6px!important;
+    font-size:10px!important;
+  }
+  .bus-delete-btn{grid-column:auto!important}
+
+  .header-actions{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .header-actions .btn{
+    min-height:38px!important;
+    font-size:10px!important;
+    padding:8px 6px!important;
+  }
+  #themeToggleBtn,#undoBtn{grid-column:auto!important}
+
+  /* Campos da viagem mais compactos */
+  .trip-bar{
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+    margin-bottom:12px!important;
+  }
+  .trip-bar.card{padding:9px!important}
+  .field label{
+    font-size:8px!important;
+    margin-bottom:4px!important;
+  }
+  .field input,.field select{
+    min-height:39px!important;
+    padding:8px!important;
+    font-size:11px!important;
+  }
+
+  /* Mapa ocupa a largura do iPhone, sem scroll horizontal */
+  .bus-wrap{
+    overflow:visible!important;
+    padding:15px 5px!important;
+  }
+  .bus{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    padding:22px 7px 15px!important;
+    border-width:3px!important;
+    border-radius:24px 24px 18px 18px!important;
+  }
+  .front{
+    grid-template-columns:1.1fr .8fr .7fr!important;
+    gap:5px!important;
+    margin-bottom:12px!important;
+  }
+  .driver,.door,.front-seat-wrap{
+    padding:6px 4px!important;
+    min-height:56px;
+    border-radius:10px!important;
+  }
+  .driver-label,.driver-edit-btn{font-size:7px!important}
+  #driverNameDisplay{font-size:9px!important}
+  .door{font-size:8px!important}
+
+  .seat-row{
+    grid-template-columns:1fr 1fr 19px 1fr 1fr!important;
+    gap:4px!important;
+    margin-bottom:5px!important;
+  }
+  .aisle{
+    font-size:0!important;
+  }
+  .seat{
+    min-height:49px!important;
+    padding:4px 2px!important;
+    gap:1px!important;
+    border-radius:9px!important;
+    border-width:1.5px!important;
+    box-shadow:0 3px 8px rgba(26,37,59,.06)!important;
+    touch-action:manipulation;
+  }
+  .seat-pos,.drag-handle{
+    display:none!important;
+  }
+  .seat .num{
+    font-size:12px!important;
+    line-height:1!important;
+  }
+  .seat .name{
+    display:block!important;
+    width:100%;
+    max-width:100%!important;
+    font-size:7px!important;
+    line-height:1.05!important;
+    padding:0 2px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .front-seat-wrap .seat{
+    min-height:48px!important;
+  }
+  .legend{
+    gap:5px!important;
+    padding-top:10px!important;
+    margin-top:10px!important;
+  }
+  .legend span{
+    padding:5px 7px!important;
+    font-size:8px!important;
+    gap:4px!important;
+  }
+  .dot{width:7px!important;height:7px!important}
+
+  /* Ações do mapa */
+  .bus-map-card-head{
+    gap:8px!important;
+  }
+  .bus-map-card-head h2{font-size:14px!important}
+  .seat-map-help{display:none!important}
+  .bus-map-actions{
+    width:100%;
+    display:grid!important;
+    grid-template-columns:1fr 1fr;
+    gap:6px!important;
+  }
+  .bus-map-actions .btn{
+    width:100%;
+    padding:8px 5px!important;
+    font-size:9px!important;
+  }
+
+  /* Esconde a lista duplicada "Quem ainda falta?" no celular */
+  .side-stack>section:nth-child(2){
+    display:none!important;
+  }
+  .stats{
+    grid-template-columns:repeat(4,1fr)!important;
+    gap:5px!important;
+  }
+  .stat{
+    padding:8px 5px!important;
+    border-radius:10px!important;
+    min-width:0;
+  }
+  .stat .label{
+    font-size:7px!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .stat .value{
+    font-size:19px!important;
+    margin-top:3px!important;
+  }
+
+  /* Fila: mostrar apenas o essencial */
+  .waiting-main-head .section-subtitle,
+  .waiting-version-badge,
+  .waiting-order-guide,
+  .waiting-next-call,
+  .waiting-group-priority,
+  .waiting-group-heading span,
+  .waiting-seat-status span{
+    display:none!important;
+  }
+  .waiting-main-head{
+    padding:12px!important;
+  }
+  .waiting-actions{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .waiting-actions .btn{
+    min-height:35px!important;
+    font-size:9px!important;
+    padding:7px 5px!important;
+  }
+  .waiting-free-badge{
+    min-height:31px!important;
+    font-size:10px!important;
+  }
+  .waiting-summary{
+    margin-bottom:9px!important;
+  }
+  .waiting-overview-card{
+    min-height:68px!important;
+    padding:8px!important;
+    border-radius:10px!important;
+  }
+  .waiting-overview-card .overview-label{font-size:7px!important}
+  .waiting-overview-card strong{font-size:20px!important}
+  .waiting-overview-card small{font-size:7px!important;margin-top:4px!important}
+  .waiting-controls{
+    padding:7px!important;
+    gap:6px!important;
+    margin-bottom:9px!important;
+  }
+  .waiting-search,.waiting-filter{
+    min-height:38px!important;
+    font-size:10px!important;
+  }
+  .waiting-group-card{
+    border-radius:12px!important;
+  }
+  .waiting-group-head{
+    min-height:48px!important;
+    padding:8px!important;
+  }
+  .waiting-group-rank{
+    min-width:62px!important;
+    min-height:25px!important;
+    font-size:7px!important;
+  }
+  .waiting-group-heading strong{
+    font-size:11px!important;
+  }
+  .waiting-item{
+    min-height:58px!important;
+    padding:8px!important;
+    gap:6px!important;
+  }
+  .waiting-position{
+    width:30px!important;
+    height:30px!important;
+    font-size:11px!important;
+  }
+  .waiting-position-wrap span{display:none!important}
+  .waiting-name{font-size:11px!important}
+  .waiting-group{display:none!important}
+  .travel-mode-chip{
+    padding:3px 5px!important;
+    font-size:7px!important;
+  }
+  .waiting-drag-handle{display:none!important}
+  .waiting-seat-status{
+    padding:5px 7px!important;
+  }
+  .waiting-seat-status strong{
+    font-size:8px!important;
+  }
+  .waiting-row-actions{
+    gap:4px!important;
+  }
+  .waiting-travel-select{
+    min-height:34px!important;
+    font-size:9px!important;
+  }
+  .waiting-row-actions .mini-btn{
+    min-height:34px!important;
+    font-size:9px!important;
+  }
+
+  /* Passageiros: cards enxutos */
+  .selection-toolbar{
+    padding:8px 10px!important;
+    font-size:9px!important;
+  }
+  .table-wrap tbody tr{
+    grid-template-columns:32px minmax(0,1fr)!important;
+    gap:5px 8px!important;
+    padding:9px!important;
+  }
+  /* Esconde curso, ponto e telefone nos cards do celular */
+  .table-wrap tbody td:nth-child(4),
+  .table-wrap tbody td:nth-child(5),
+  .table-wrap tbody td:nth-child(6){
+    display:none!important;
+  }
+  .table-wrap tbody td:nth-child(3){
+    font-size:12px!important;
+  }
+  .table-wrap tbody td:nth-child(7),
+  .table-wrap tbody td:nth-child(8),
+  .table-wrap tbody td:nth-child(9),
+  .table-wrap tbody td:nth-child(10){
+    grid-column:2;
+  }
+  .table-wrap .status-chip{
+    padding:4px 6px!important;
+    font-size:8px!important;
+  }
+
+  /* Modal de poltrona: menos poluído */
+  #seatModalBody>div>div:nth-child(2),
+  #seatModalBody>div>div:nth-child(3),
+  #seatModalBody>div>div:nth-child(4),
+  #seatModalBody>div>div:nth-child(5){
+    display:none;
+  }
+  #seatModal .status-actions{
+    grid-template-columns:1fr 1fr!important;
+    gap:6px!important;
+  }
+  #seatModal .status-actions .btn{
+    min-height:39px!important;
+    padding:8px 5px!important;
+    font-size:9px!important;
+  }
+  #seatModal .manual-travel-box{
+    padding:8px!important;
+  }
+  #seatModal .manual-travel-help{
+    display:none!important;
+  }
+}
+
+/* Telas bem pequenas */
+@media(max-width:390px){
+  .trip-bar{grid-template-columns:1fr!important}
+  .header-actions{grid-template-columns:1fr 1fr!important}
+  .bus-switcher-controls{grid-template-columns:1fr 1fr!important}
+  .bus-delete-btn{grid-column:1/-1!important}
+  .seat-row{grid-template-columns:1fr 1fr 15px 1fr 1fr!important}
+  .seat{min-height:47px!important}
+  .seat .name{font-size:6.5px!important}
+}
+
+/* Tema escuro da barra de movimentação */
+html[data-theme="dark"] .seat-move-bar{
+  background:#e8eef9;
+  color:#111a29;
+  border-color:#fff;
+}
+html[data-theme="dark"] .seat-move-bar-text span{
+  color:#53617a;
+}
+html[data-theme="dark"] .seat-move-cancel{
+  color:#111a29;
+  background:#dce5f3;
+  border-color:#c9d4e5;
+}
