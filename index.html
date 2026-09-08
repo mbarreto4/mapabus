@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MapaBus Faculdade • Multiônibus V9</title>
+  <link rel="stylesheet" href="style.css?v=theme1">
+  <script>
+    (function(){
+      try{
+        const saved=localStorage.getItem("mapabus_theme");
+        const theme=saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme=theme;
+      }catch(e){}
+    })();
+  </script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>MapaBus Faculdade</h1>
+      <p>Layout configurável • múltiplos ônibus • ida e volta</p>
+    </div>
+    <div class="bus-switcher">
+      <div class="bus-switcher-title">
+        <span class="bus-icon" aria-hidden="true">BUS</span>
+        <div class="bus-switcher-labels"><small>ÔNIBUS ATIVO</small><strong id="activeBusName">Ônibus 1</strong></div>
+      </div>
+      <div class="bus-switcher-controls">
+        <select id="busSelect" class="bus-select" onchange="switchBus(this.value)" aria-label="Selecionar ônibus"></select>
+        <button class="bus-action-btn bus-add-btn" onclick="addBus()">+ Adicionar</button>
+        <button class="bus-action-btn" onclick="renameActiveBus()">Renomear</button>
+        <button class="bus-action-btn bus-delete-btn" onclick="deleteActiveBus()">Excluir</button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="themeToggleBtn" class="btn btn-theme" onclick="toggleTheme()" aria-label="Alternar tema">☾ Tema escuro</button>
+      <button id="undoBtn" class="btn btn-undo" onclick="undoLastAction()" disabled>↶ Desfazer</button>
+      <button class="btn btn-light" onclick="openPassengerModal()">+ Cadastrar passageiro</button>
+      <button class="btn btn-primary" onclick="exportBackup()">Exportar backup</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="trip-bar card" style="padding:14px">
+      <div class="field">
+        <label>DATA DA VIAGEM</label>
+        <input id="tripDate" type="date">
+      </div>
+      <div class="field">
+        <label>DESTINO</label>
+        <input id="destination" value="Faculdade">
+      </div>
+      <div class="field">
+        <label>TURNO</label>
+        <select id="shift">
+          <option>Noite</option>
+          <option>Manhã</option>
+          <option>Tarde</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>VISUALIZAR STATUS</label>
+        <select id="direction">
+          <option value="ida">Ida para faculdade</option>
+          <option value="volta">Volta da faculdade</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="top-grid">
+      <section class="card">
+        <div class="card-head bus-map-card-head">
+          <div>
+            <h2>Mapa das poltronas</h2>
+            <div class="seat-map-help">Clique para gerenciar • arraste um aluno para trocar de poltrona</div>
+          </div>
+          <div class="bus-map-actions">
+            <button type="button" class="btn btn-outline btn-seat-config" onclick="openSeatConfigModal()">⚙ Configurar poltronas</button>
+            <button type="button" class="btn btn-outline btn-download-bus" onclick="downloadBusImage()">⬇ Baixar imagem do ônibus</button>
+          </div>
+        </div>
+        <div class="bus-wrap">
+          <div class="bus">
+            <div class="front">
+              <div class="driver driver-editor">
+                <span class="driver-label">MOTORISTA</span>
+                <strong id="driverNameDisplay">Bonfim</strong>
+                <button type="button" class="driver-edit-btn" onclick="editActiveDriver()" title="Alterar motorista">✎ Alterar</button>
+              </div>
+              <div class="front-seat-wrap" id="frontSeat49"></div>
+              <div class="door">PORTA</div>
+            </div>
+            <div id="seatMap"></div>
+            <div class="legend">
+              <span><i class="dot" style="background:#eef2f7"></i>Livre</span>
+              <span><i class="dot" style="background:#fff0bf"></i>Aguardando</span>
+              <span><i class="dot" style="background:#cfeedd"></i>Embarcou</span>
+              <span><i class="dot" style="background:#f8cfcf"></i>Não vai / faltou</span>
+              <span><i class="dot" style="background:#d5e4ff"></i>Retorno confirmado</span>
+              <span><i class="dot only-return-legend-dot"></i>Só volta</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="side-stack">
+        <section class="card">
+          <div class="card-head"><h2>Resumo do dia</h2></div>
+          <div class="card-body">
+            <div class="stats">
+              <div class="stat"><div class="label">Cadastrados</div><div id="statRegistered" class="value">0</div></div>
+              <div class="stat"><div class="label">Embarcaram</div><div id="statBoarded" class="value">0</div></div>
+              <div class="stat"><div class="label">Aguardando</div><div id="statPending" class="value">0</div></div>
+              <div class="stat"><div class="label">Não vão</div><div id="statAbsent" class="value">0</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Quem ainda falta?</h2>
+          </div>
+          <div class="card-body">
+            <div id="pendingList" class="quick-list"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Dados</h2></div>
+          <div class="card-body" style="display:grid;gap:8px">
+            <button class="btn btn-primary" onclick="openTextImportModal()">Importar lista em texto</button>
+            <button class="btn btn-outline btn-generate-list" onclick="openGenerateTextModal()">Gerar lista em texto</button>
+            <input id="importFile" type="file" accept=".json" hidden>
+            <button class="btn btn-danger" onclick="clearToday()">Limpar marcações do dia</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="card section waiting-section">
+      <div class="card-head waiting-main-head">
+        <div>
+          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><h2>Fila de espera</h2><span class="waiting-version-badge">Painel de prioridade</span></div>
+          <div class="section-subtitle">Prioridade por semestre. Quem não couber neste ônibus pode ser enviado ao próximo ônibus mantendo a ordem da fila.</div>
+        </div>
+        <div class="waiting-actions">
+          <span id="waitingFreeSeats" class="waiting-free-badge">0 vagas livres</span>
+          <button id="restorePriorityBtn" class="btn btn-outline" onclick="restoreAutomaticWaitingPriority()" style="display:none">Restaurar prioridade</button>
+          <button class="btn btn-outline" onclick="allocateNextWaitingPassenger()">Chamar próximo</button>
+          <button id="transferOverflowBtn" class="btn btn-outline btn-transfer-overflow" onclick="transferWaitingToNextBus()">Enviar excedentes</button>
+          <button class="btn btn-primary" onclick="fillFreeSeatsFromWaiting()">Preencher vagas</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="waitingSummary" class="waiting-summary"></div>
+
+        <div class="waiting-controls">
+          <div class="waiting-search-wrap">
+            <span class="waiting-search-icon">⌕</span>
+            <input id="waitingSearch" class="waiting-search" placeholder="Buscar aluno na fila" oninput="renderWaitingList()">
+          </div>
+          <select id="waitingGroupFilter" class="waiting-filter" onchange="renderWaitingList()">
+            <option value="all">Todos os grupos</option>
+          </select>
+          <select id="waitingStatusFilter" class="waiting-filter" onchange="renderWaitingList()">
+            <option value="all">Todos os status</option>
+            <option value="now">Entra agora</option>
+            <option value="waiting">Aguardando vaga</option>
+            <option value="idaonly">Somente ida</option>
+            <option value="return">Somente volta</option>
+            <option value="both">Ida e volta</option>
+          </select>
+        </div>
+
+        <div id="waitingNextCall" class="waiting-next-call"></div>
+        <div id="waitingList" class="waiting-list"></div>
+      </div>
+    </section>
+
+    <section class="card section">
+      <div class="card-head">
+        <div>
+          <h2>Passageiros cadastrados</h2>
+          <div class="section-subtitle">Marque vários alunos para excluir todos de uma vez.</div>
+        </div>
+        <div class="table-tools">
+          <input id="searchInput" class="search" placeholder="Buscar nome, curso, ponto ou poltrona">
+          <button id="deleteSelectedBtn" class="btn btn-danger bulk-delete-btn" onclick="deleteSelectedPassengers()" disabled>Excluir selecionados (0)</button>
+        </div>
+      </div>
+      <div class="selection-toolbar">
+        <label class="select-all-control">
+          <input id="selectAllPassengers" type="checkbox" onchange="toggleSelectAllVisible(this.checked)">
+          <span>Selecionar todos os alunos visíveis</span>
+        </label>
+        <button class="selection-clear" onclick="clearPassengerSelection()">Limpar seleção</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="select-col"></th>
+              <th>Poltrona</th>
+              <th>Nome</th>
+              <th>Curso</th>
+              <th>Ponto</th>
+              <th>Telefone</th>
+              <th>Uso</th>
+              <th>Ida</th>
+              <th>Volta</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="passengerTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="passengerModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="passengerModalTitle">Cadastrar passageiro</h3>
+      <button class="close" onclick="closePassengerModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="passengerForm" class="form-grid">
+        <input id="editingId" type="hidden">
+        <div class="field full">
+          <label>NOME COMPLETO *</label>
+          <input id="name" required placeholder="Ex.: João da Silva">
+        </div>
+        <div class="field">
+          <label>POLTRONA *</label>
+          <select id="seat" required></select>
+        </div>
+        <div class="field">
+          <label>TELEFONE</label>
+          <input id="phone" placeholder="(00) 00000-0000">
+        </div>
+        <div class="field">
+          <label>CURSO</label>
+          <input id="course" placeholder="Ex.: Direito">
+        </div>
+        <div class="field">
+          <label>PONTO DE EMBARQUE</label>
+          <input id="pickup" placeholder="Ex.: Praça Central">
+        </div>
+        <div class="field">
+          <label>UTILIZAÇÃO</label>
+          <select id="travelMode">
+            <option value="ambos">Ida e volta</option>
+            <option value="ida">Somente ida</option>
+            <option value="volta">Somente volta</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>OBSERVAÇÃO</label>
+          <input id="notes" placeholder="Informação opcional">
+        </div>
+      </form>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePassengerModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePassenger()">Salvar passageiro</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="textImportModal" class="modal">
+  <div class="modal-card" style="width:min(820px,100%)">
+    <div class="modal-head">
+      <h3>Importar lista em texto</h3>
+      <button class="close" onclick="closeTextImportModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-help">
+        <strong>O sistema reconhece o modelo da sua lista.</strong><br>
+        Exemplo: <strong>(1) Tainá Rocha</strong>, <strong>(4)</strong> para poltrona livre e <strong>(39) Jessica (volta)</strong> para passageiro que só utilizará o retorno e <strong>(10) Ana (ida)</strong> para somente ida.<br>
+        Títulos como <strong>4º e 3º Semestres</strong>, <strong>2º Semestre</strong>, <strong>Uniplan</strong> e <strong>Primeiro Semestre</strong> são reconhecidos como grupos e entram automaticamente na <strong>lista de espera</strong>. Os semestres mais avançados recebem prioridade.
+      </div>
+
+      <textarea id="textImportArea" class="text-import" placeholder="Lista Terça-Feira\n25/08\nFied Sede\n\n(1) Tainá Rocha\n(2) Allana Souza\n(3) Jennifer Batista\n(4)\n...\n\n2º Semestre\n1- Lannah Milla\n2- Vitória Taiane"></textarea>
+
+      <div id="textImportMeta" class="import-meta"></div>
+
+      <div id="textImportPreview" class="import-preview">
+        <div class="import-preview-head">
+          <span>Prévia das poltronas</span>
+          <span id="textImportCount">0 passageiros</span>
+        </div>
+        <div id="textImportPreviewBody" class="import-preview-body">
+          <div class="empty" style="margin:12px">Cole a lista acima para visualizar.</div>
+        </div>
+      </div>
+
+      <div id="textImportGroups" class="import-groups"></div>
+      <div id="textImportWarnings"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeTextImportModal()">Cancelar</button>
+      <button class="btn btn-outline" onclick="applyTextImport('merge')">Atualizar preenchidos</button>
+      <button class="btn btn-primary" onclick="applyTextImport('sync')">Sincronizar com a lista</button>
+    </div>
+  </div>
+</div>
+
+<div id="generateTextModal" class="modal">
+  <div class="modal-card generate-text-modal-card">
+    <div class="modal-head">
+      <div>
+        <h3>Gerar lista em texto</h3>
+        <div class="generate-text-subtitle">Lista pronta para copiar e enviar no WhatsApp.</div>
+      </div>
+      <button class="close" onclick="closeGenerateTextModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="generate-text-info">
+        <span id="generateTextDateChip"></span>
+        <span id="generateTextOccupiedChip"></span>
+        <span id="generateTextWaitingChip"></span>
+      </div>
+      <textarea id="generatedTextArea" class="generated-text-area" readonly></textarea>
+      <div class="generate-text-hint">O texto inclui as poltronas ativas deste ônibus, utilização de ida/volta e a fila de espera organizada por grupo.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="refreshGeneratedText()">Atualizar texto</button>
+      <button class="btn btn-outline" onclick="downloadGeneratedText()">Baixar .txt</button>
+      <button class="btn btn-primary" onclick="copyGeneratedText()">Copiar lista</button>
+    </div>
+  </div>
+</div>
+
+<div id="seatConfigModal" class="modal">
+  <div class="modal-card seat-config-modal-card">
+    <div class="modal-head">
+      <div>
+        <h3>Configurar poltronas</h3>
+        <div class="seat-config-subtitle">Personalize a capacidade somente do ônibus ativo.</div>
+      </div>
+      <button class="close" onclick="closeSeatConfigModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="seat-config-summary">
+        <div><span>Capacidade atual</span><strong id="seatConfigCapacity">49</strong></div>
+        <div><span>Poltronas padrão ativas</span><strong id="seatConfigBaseCount">49</strong></div>
+        <div><span>Poltronas extras</span><strong id="seatConfigExtraCountDisplay">0</strong></div>
+      </div>
+
+      <div class="seat-config-extra-box">
+        <div>
+          <strong>Adicionar poltronas extras</strong>
+          <span>Serão numeradas 50, 51, 52...</span>
+        </div>
+        <div class="seat-config-extra-controls">
+          <button type="button" class="seat-config-step" onclick="changeExtraSeatCount(-1)">−</button>
+          <input id="seatConfigExtraCount" type="number" min="0" max="20" value="0" onchange="setExtraSeatCount(this.value)">
+          <button type="button" class="seat-config-step" onclick="changeExtraSeatCount(1)">+</button>
+        </div>
+      </div>
+
+      <div class="seat-config-section-head">
+        <div><strong>Poltronas 1 a 49</strong><span>Clique em uma poltrona para ativar ou desabilitar.</span></div>
+        <div class="seat-config-bulk-actions">
+          <button type="button" class="mini-btn mini-primary" onclick="setAllBaseSeatsActive(true)">Ativar todas</button>
+          <button type="button" class="mini-btn mini-warning" onclick="setAllBaseSeatsActive(false)">Desabilitar todas</button>
+        </div>
+      </div>
+      <div id="seatConfigGrid" class="seat-config-grid"></div>
+      <div class="seat-config-note">Poltronas desabilitadas não contam como vagas e não podem receber passageiros. Se uma poltrona ocupada for desabilitada, o aluno será enviado para a fila de espera após sua confirmação.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSeatConfigModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSeatConfiguration()">Salvar configuração</button>
+    </div>
+  </div>
+</div>
+
+<div id="seatModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="seatModalTitle">Poltrona</h3>
+      <button class="close" onclick="closeSeatModal()">×</button>
+    </div>
+    <div id="seatModalBody" class="modal-body"></div>
+    <div id="seatModalActions" class="modal-actions"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="script.js?v=theme1"></script>
+</body>
+</html>
