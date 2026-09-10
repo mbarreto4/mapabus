@@ -647,6 +647,41 @@ function setPassengerStatus(passengerId, direction, status){
   renderAll();
 }
 
+
+function quickConfirmPassengerBySeat(seat){
+  seat=Number(seat);
+  const p=passengerBySeat(seat);
+  if(!p){
+    openSeatModal(seat);
+    return;
+  }
+
+  const direction=document.getElementById("direction")?.value||"ida";
+
+  if(!isEligibleForDirection(p,direction)){
+    toast(`${p.name} está marcado(a) como ${travelModeLabel(passengerTravelMode(p))} e não utiliza a ${direction}.`);
+    return;
+  }
+
+  const current=getPassengerStatus(p.id,direction);
+
+  // Toque rápido funciona como alternador:
+  // amarelo (aguardando) -> confirmado
+  // confirmado -> amarelo (aguardando)
+  if(current==="boarded"){
+    setPassengerStatus(p.id,direction,"pending");
+    toast(direction==="ida"
+      ? `↶ Embarque de ${p.name} voltou para aguardando.`
+      : `↶ Retorno de ${p.name} voltou para aguardando.`);
+    return;
+  }
+
+  setPassengerStatus(p.id,direction,"boarded");
+  toast(direction==="ida"
+    ? `✓ Embarque de ${p.name} confirmado.`
+    : `✓ Retorno de ${p.name} confirmado.`);
+}
+
 function statusLabel(status, direction){
   if(status==="boarded") return direction==="ida" ? "Embarcou" : "Retornou";
   if(status==="absent") return direction==="ida" ? "Não vai" : "Não volta";
@@ -860,9 +895,10 @@ function makeSeat(n,direction){
     const mode = passengerTravelMode(p);
     b.classList.add(statusClass(st,direction), travelModeClass(mode));
     b.draggable = true;
-    b.title = `Arraste ${p.name} para outra poltrona`;
-    b.setAttribute("aria-label", `${p.name}, poltrona ${n}. Arraste para mudar de lugar.`);
-    b.innerHTML = `<span class="seat-pos">${pos}</span><span class="num">${String(n).padStart(2,"0")}</span><span class="name">${escapeHtml(p.name)}</span><span class="drag-handle" aria-hidden="true">⋮⋮</span>`;
+    b.title = `Clique para confirmar ${p.name}. Pressione e segure para abrir as opções.`;
+    b.setAttribute("aria-label", `${p.name}, poltrona ${n}. Toque para confirmar. Pressione e segure para abrir opções.`);
+    if(st==="boarded") b.classList.add("seat-confirmed");
+    b.innerHTML = `<span class="seat-pos">${pos}</span><span class="num">${String(n).padStart(2,"0")}</span><span class="name">${escapeHtml(p.name)}</span>${st==="boarded"?'<span class="seat-confirm-mark" aria-hidden="true">✓</span>':''}<span class="drag-handle" aria-hidden="true">⋮⋮</span>`;
 
     b.addEventListener("dragstart", e=>{
       draggedSeat=n;
@@ -880,51 +916,52 @@ function makeSeat(n,direction){
       setTimeout(()=>{ isDraggingSeat=false; },80);
     });
 
-    // Suporte a celular/tablet: toque prolongado e arraste.
+    // Celular/tablet:
+    // toque rápido = confirmar presença;
+    // toque prolongado = abrir as opções completas da poltrona.
     let longPressTimer=null;
-    let touchDragging=false;
-    b.addEventListener("touchstart", ()=>{
+    let longPressTriggered=false;
+    let touchStartX=0;
+    let touchStartY=0;
+
+    b.addEventListener("touchstart", e=>{
+      if(mobileMoveSourceSeat!==null) return;
+      const touch=e.touches?.[0];
+      if(touch){
+        touchStartX=touch.clientX;
+        touchStartY=touch.clientY;
+      }
+      longPressTriggered=false;
+      clearTimeout(longPressTimer);
       longPressTimer=setTimeout(()=>{
-        draggedSeat=n;
-        touchDragging=true;
-        isDraggingSeat=true;
-        b.classList.add("dragging");
+        longPressTriggered=true;
+        suppressSeatClickUntil=Date.now()+700;
         if(navigator.vibrate) navigator.vibrate(25);
-      },320);
+        openSeatModal(n);
+      },560);
     },{passive:true});
 
     b.addEventListener("touchmove", e=>{
-      if(!touchDragging){
-        clearTimeout(longPressTimer);
-        return;
-      }
-      e.preventDefault();
-      const touch=e.touches[0];
-      const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest(".seat");
-      document.querySelectorAll(".seat.drop-target,.seat.drop-swap").forEach(el=>el.classList.remove("drop-target","drop-swap"));
-      touchDragTargetSeat=null;
-      if(target && Number(target.dataset.seat)!==Number(n)){
-        touchDragTargetSeat=Number(target.dataset.seat);
-        target.classList.add("drop-target");
-        if(passengerBySeat(touchDragTargetSeat)) target.classList.add("drop-swap");
-      }
-    },{passive:false});
+      const touch=e.touches?.[0];
+      if(!touch) return;
+      const moved=Math.hypot(touch.clientX-touchStartX,touch.clientY-touchStartY);
+      if(moved>12) clearTimeout(longPressTimer);
+    },{passive:true});
 
-    const finishTouchDrag=()=>{
+    b.addEventListener("touchend", ()=>{
       clearTimeout(longPressTimer);
-      if(touchDragging){
-        const targetSeat=touchDragTargetSeat;
-        clearSeatDropHighlights();
-        touchDragging=false;
-        draggedSeat=null;
-        touchDragTargetSeat=null;
-        suppressSeatClickUntil=Date.now()+550;
-        isDraggingSeat=false;
-        if(targetSeat) movePassengerBetweenSeats(n,targetSeat);
+      if(longPressTriggered){
+        suppressSeatClickUntil=Date.now()+700;
+        longPressTriggered=false;
       }
-    };
-    b.addEventListener("touchend",finishTouchDrag,{passive:true});
-    b.addEventListener("touchcancel",finishTouchDrag,{passive:true});
+    },{passive:true});
+
+    b.addEventListener("touchcancel", ()=>{
+      clearTimeout(longPressTimer);
+      longPressTriggered=false;
+    },{passive:true});
+
+    b.addEventListener("contextmenu", e=>e.preventDefault());
   }
 
   if(mobileMoveSourceSeat!==null){
@@ -983,6 +1020,40 @@ function makeSeat(n,direction){
   b.onclick = () => {
     if(isDraggingSeat || isDraggingWaiting || Date.now()<suppressSeatClickUntil) return;
     if(handleSeatMoveTap(n)) return;
+
+    const passenger=passengerBySeat(n);
+
+    // Celular/tablet: toque rápido confirma imediatamente.
+    const isDesktopPointer = window.matchMedia &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    if(!isDesktopPointer){
+      if(passenger) quickConfirmPassengerBySeat(n);
+      else openSeatModal(n);
+      return;
+    }
+
+    // Desktop: aguarda alguns milissegundos para diferenciar
+    // 1 clique de 2 cliques.
+    clearTimeout(b._singleClickTimer);
+    b._singleClickTimer=setTimeout(()=>{
+      if(passenger) quickConfirmPassengerBySeat(n);
+      else openSeatModal(n);
+      b._singleClickTimer=null;
+    },240);
+  };
+
+  // Desktop: dois cliques abrem o menu antigo sem alterar a confirmação.
+  b.ondblclick = (e) => {
+    const isDesktopPointer = window.matchMedia &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if(!isDesktopPointer) return;
+    if(isDraggingSeat || isDraggingWaiting || Date.now()<suppressSeatClickUntil) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    clearTimeout(b._singleClickTimer);
+    b._singleClickTimer=null;
     openSeatModal(n);
   };
   return b;
