@@ -1641,43 +1641,90 @@ function deleteSelectedPassengers(){
 }
 
 function renderTable(){
-  const tbody=document.getElementById("passengerTable");
+  const holder=document.getElementById("passengerTable");
   const rows=visiblePassengerRows();
 
+  if(!holder) return;
+
   if(!rows.length){
-    tbody.innerHTML=`<tr><td colspan="10"><div class="empty">Nenhum passageiro encontrado.</div></td></tr>`;
+    holder.innerHTML=`<div class="empty passenger-empty">Nenhum passageiro encontrado.</div>`;
+    updatePassengerSelectionUI();
     return;
   }
-  tbody.innerHTML=rows.map(p=>{
-    const ida=getPassengerStatus(p.id,"ida");
-    const volta=getPassengerStatus(p.id,"volta");
-    const rowMode=passengerTravelMode(p);
-    return `<tr class="${selectedPassengerIds.has(p.id)?'row-selected':''} ${rowMode==='volta'?'row-only-return':''}">
-      <td class="select-col"><input class="passenger-checkbox" type="checkbox" ${selectedPassengerIds.has(p.id)?'checked':''} onchange="togglePassengerSelection('${p.id}',this.checked)" aria-label="Selecionar ${escapeHtml(p.name)}"></td>
-      <td><strong>${String(p.seat).padStart(2,"0")}</strong></td>
-      <td><strong class="${rowMode==='volta'?'name-only-return':''}">${escapeHtml(p.name)}</strong></td>
-      <td>${escapeHtml(p.course||"—")}</td>
-      <td>${escapeHtml(p.pickup||"—")}</td>
-      <td>${escapeHtml(p.phone||"—")}</td>
-      <td>
-        <select class="quick-travel-select ${travelModeClass(passengerTravelMode(p))}" onchange="setPassengerTravelModeManual('${p.id}',this.value)" aria-label="Uso da viagem de ${escapeHtml(p.name)}">
-          <option value="ambos" ${passengerTravelMode(p)==='ambos'?'selected':''}>Ida + volta</option>
-          <option value="ida" ${passengerTravelMode(p)==='ida'?'selected':''}>Só ida</option>
-          <option value="volta" ${passengerTravelMode(p)==='volta'?'selected':''}>Só volta</option>
-        </select>
-      </td>
-      <td><span class="status-chip ${chipClass(ida,"ida")}">${statusLabel(ida,"ida")}</span></td>
-      <td><span class="status-chip ${chipClass(volta,"volta")}">${statusLabel(volta,"volta")}</span></td>
-      <td>
-        <button class="mini-btn mini-primary" onclick="editPassenger('${p.id}')">Editar</button>
-        <button class="mini-btn mini-warning" onclick="movePassengerToWaiting('${p.id}')">Liberar</button>
-        <button class="mini-btn mini-danger" onclick="deletePassenger('${p.id}')">Excluir</button>
-      </td>
-    </tr>`;
-  }).join("");
+
+  const direction=document.getElementById("direction")?.value||"ida";
+  const confirmedCount=rows.filter(p=>getPassengerStatus(p.id,direction)==="boarded").length;
+
+  holder.innerHTML=`
+    <div class="passenger-group-card">
+      <div class="passenger-group-head">
+        <div class="passenger-group-badge">NO ÔNIBUS</div>
+        <div class="passenger-group-heading">
+          <strong>Passageiros</strong>
+          <span>${rows.length} aluno${rows.length===1?"":"s"} • ${confirmedCount} confirmado${confirmedCount===1?"":"s"} na ${direction}</span>
+        </div>
+        <div class="passenger-group-status">${direction==="ida"?"Ida":"Volta"}</div>
+      </div>
+
+      <div class="passenger-card-list">
+        ${rows.map(p=>{
+          const ida=getPassengerStatus(p.id,"ida");
+          const volta=getPassengerStatus(p.id,"volta");
+          const mode=passengerTravelMode(p);
+          const onlyReturn=mode==="volta";
+          const selected=selectedPassengerIds.has(p.id);
+
+          const extraInfo=[p.course,p.pickup].filter(Boolean).join(" • ");
+
+          return `
+            <div class="passenger-priority-row ${selected?'row-selected':''} ${onlyReturn?'row-only-return':''}">
+              <div class="passenger-select-seat">
+                <input class="passenger-checkbox" type="checkbox"
+                  ${selected?'checked':''}
+                  onchange="togglePassengerSelection('${p.id}',this.checked)"
+                  aria-label="Selecionar ${escapeHtml(p.name)}">
+                <div class="passenger-seat-badge">${String(p.seat).padStart(2,"0")}</div>
+                <span>POLTRONA</span>
+              </div>
+
+              <div class="passenger-card-person">
+                <div class="passenger-card-name-row">
+                  <strong class="passenger-card-name ${onlyReturn?'name-only-return':''}">${escapeHtml(p.name)}</strong>
+                  <span class="travel-mode-chip ${travelModeClass(mode)}">${travelModeLabel(mode)}</span>
+                </div>
+                ${extraInfo?`<div class="passenger-card-extra">${escapeHtml(extraInfo)}</div>`:''}
+              </div>
+
+              <div class="passenger-trip-statuses">
+                <div class="passenger-trip-status">
+                  <span>IDA</span>
+                  <strong class="${chipClass(ida,"ida")}">${statusLabel(ida,"ida")}</strong>
+                </div>
+                <div class="passenger-trip-status">
+                  <span>VOLTA</span>
+                  <strong class="${chipClass(volta,"volta")}">${statusLabel(volta,"volta")}</strong>
+                </div>
+              </div>
+
+              <div class="passenger-card-actions">
+                <select class="quick-travel-select ${travelModeClass(mode)}"
+                  onchange="setPassengerTravelModeManual('${p.id}',this.value)"
+                  aria-label="Uso da viagem de ${escapeHtml(p.name)}">
+                  <option value="ambos" ${mode==='ambos'?'selected':''}>Ida + volta</option>
+                  <option value="ida" ${mode==='ida'?'selected':''}>Só ida</option>
+                  <option value="volta" ${mode==='volta'?'selected':''}>Só volta</option>
+                </select>
+                <button class="mini-btn mini-primary" onclick="editPassenger('${p.id}')">Editar</button>
+                <button class="mini-btn mini-warning" onclick="movePassengerToWaiting('${p.id}')">Liberar</button>
+                <button class="mini-btn mini-danger" onclick="deletePassenger('${p.id}')">Excluir</button>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+
   updatePassengerSelectionUI();
 }
-
 function renderAll(){
   renderBusSelector();
   renderDriverName();
@@ -2126,8 +2173,8 @@ function updateTextImportPreview(){
       <div class="import-preview-row ${r.errors.length ? "import-error" : (r.empty ? "import-empty" : "")}">
         <div class="import-seat">${String(r.seat).padStart(2,"0")}</div>
         <div>
-          <strong>${r.empty ? "Poltrona livre" : escapeHtml(r.name)}</strong>
-          ${!r.empty ? `<div class="import-note">${travelModeLabel(r.travelMode)}</div>` : ""}
+          <strong>${r.empty ? "Livre" : escapeHtml(r.name)}</strong>
+          ${!r.empty && r.travelMode!=="ambos" ? `<div class="import-note">${travelModeLabel(r.travelMode)}</div>` : ""}
           ${r.errors.length ? `<div class="import-line-error">Linha ${r.line}: ${escapeHtml(r.errors.join(", "))}</div>` : ""}
         </div>
       </div>`).join("");
@@ -2136,15 +2183,11 @@ function updateTextImportPreview(){
   if(parsed.groups.length){
     const total=parsed.groups.reduce((sum,g)=>sum+g.people.length,0);
     groupsBox.innerHTML = `
-      <div class="import-groups-head"><strong>Listas adicionais detectadas</strong><span>${total} nome${total===1?"":"s"}</span></div>
-      <div class="import-groups-grid">
-        ${parsed.groups.map(g=>`
-          <div class="import-group-card">
-            <div class="import-group-title">${escapeHtml(g.name)} <span>${g.people.length}</span></div>
-            <div class="import-group-names">${g.people.map(p=>`${escapeHtml(p.name)} <em>(${travelModeLabel(p.travelMode).toLowerCase()})</em>`).join(" • ") || "—"}</div>
-          </div>`).join("")}
+      <div class="import-groups-head"><strong>Fila detectada</strong><span>${total} aluno${total===1?"":"s"}</span></div>
+      <div class="import-groups-summary">
+        ${parsed.groups.map(g=>`<span class="import-group-summary-chip"><strong>${escapeHtml(g.name)}</strong><b>${g.people.length}</b></span>`).join("")}
       </div>
-      <div class="import-groups-note">Esses números são apenas a ordem dentro de cada grupo e <strong>não alteram as poltronas</strong>. Ao importar, esses alunos entram na lista de espera ordenada por semestre.</div>`;
+      <div class="import-groups-note import-groups-note-compact">Será adicionada à fila por prioridade.</div>`;
   }else groupsBox.innerHTML="";
 
   if(parsed.errors.length){
@@ -2152,7 +2195,7 @@ function updateTextImportPreview(){
   }else if(parsed.seatRows.length){
     const activeSeats=configuredSeatNumbers();
     const missingConfigured=parsed.model ? activeSeats.filter(n=>!parsed.seatRows.some(r=>r.seat===n)) : [];
-    warnings.innerHTML = `<div class="import-warning import-ok"><strong>Lista pronta.</strong> “Atualizar preenchidos” mantém poltronas vazias como estão. “Sincronizar com a lista” também libera as poltronas que vierem vazias.${missingConfigured.length?` ${missingConfigured.length} poltrona(s) ativa(s) não aparecem no texto e serão preservadas.`:''}</div>`;
+    warnings.innerHTML = `<div class="import-warning import-ok"><strong>Pronto para importar.</strong>${missingConfigured.length?` ${missingConfigured.length} poltrona(s) não citada(s) serão mantidas.`:''}</div>`;
   }else warnings.innerHTML="";
 }
 

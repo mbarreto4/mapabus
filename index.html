@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MapaBus Faculdade • Multiônibus V9</title>
-  <link rel="stylesheet" href="style.css?v=stylecss1">
+  <link rel="stylesheet" href="style.css?v=passengerCards1">
   <script>
     (function(){
       try{
@@ -191,10 +191,10 @@
       <div class="card-head">
         <div>
           <h2>Passageiros cadastrados</h2>
-          <div class="section-subtitle">Marque vários alunos para excluir todos de uma vez.</div>
+          <div class="section-subtitle">Passageiros organizados por poltrona.</div>
         </div>
         <div class="table-tools">
-          <input id="searchInput" class="search" placeholder="Buscar nome, curso, ponto ou poltrona">
+          <input id="searchInput" class="search" placeholder="Buscar passageiro ou poltrona">
           <button id="deleteSelectedBtn" class="btn btn-danger bulk-delete-btn" onclick="deleteSelectedPassengers()" disabled>Excluir selecionados (0)</button>
         </div>
       </div>
@@ -205,25 +205,7 @@
         </label>
         <button class="selection-clear" onclick="clearPassengerSelection()">Limpar seleção</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="select-col"></th>
-              <th>Poltrona</th>
-              <th>Nome</th>
-              <th>Curso</th>
-              <th>Ponto</th>
-              <th>Telefone</th>
-              <th>Uso</th>
-              <th>Ida</th>
-              <th>Volta</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="passengerTable"></tbody>
-        </table>
-      </div>
+      <div id="passengerTable" class="passenger-priority-list"></div>
     </section>
   </main>
 </div>
@@ -287,9 +269,9 @@
     </div>
     <div class="modal-body">
       <div class="import-help">
-        <strong>O sistema reconhece o modelo da sua lista.</strong><br>
-        Exemplo: <strong>(1) Tainá Rocha</strong>, <strong>(4)</strong> para poltrona livre e <strong>(39) Jessica (volta)</strong> para passageiro que só utilizará o retorno e <strong>(10) Ana (ida)</strong> para somente ida.<br>
-        Títulos como <strong>4º e 3º Semestres</strong>, <strong>2º Semestre</strong>, <strong>Uniplan</strong> e <strong>Primeiro Semestre</strong> são reconhecidos como grupos e entram automaticamente na <strong>lista de espera</strong>. Os semestres mais avançados recebem prioridade.
+        <strong>Cole sua lista abaixo.</strong><br>
+        <span><strong>(1) Nome</strong> = poltrona • <strong>(4)</strong> = livre • <strong>(volta)</strong> = só volta • <strong>(ida)</strong> = só ida.</span><br>
+        <span>Semestres, <strong>FACIBI</strong> e <strong>Uniplan</strong> entram na fila automaticamente.</span>
       </div>
 
       <textarea id="textImportArea" class="text-import" placeholder="Lista Terça-Feira\n25/08\nFied Sede\n\n(1) Tainá Rocha\n(2) Allana Souza\n(3) Jennifer Batista\n(4)\n...\n\n2º Semestre\n1- Lannah Milla\n2- Vitória Taiane"></textarea>
@@ -298,11 +280,11 @@
 
       <div id="textImportPreview" class="import-preview">
         <div class="import-preview-head">
-          <span>Prévia das poltronas</span>
+          <span>Prévia</span>
           <span id="textImportCount">0 passageiros</span>
         </div>
         <div id="textImportPreviewBody" class="import-preview-body">
-          <div class="empty" style="margin:12px">Cole a lista acima para visualizar.</div>
+          <div class="empty" style="margin:12px">Cole a lista para visualizar.</div>
         </div>
       </div>
 
@@ -311,8 +293,8 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeTextImportModal()">Cancelar</button>
-      <button class="btn btn-outline" onclick="applyTextImport('merge')">Atualizar preenchidos</button>
-      <button class="btn btn-primary" onclick="applyTextImport('sync')">Sincronizar com a lista</button>
+      <button class="btn btn-outline" onclick="applyTextImport('merge')">Atualizar</button>
+      <button class="btn btn-primary" onclick="applyTextImport('sync')">Sincronizar</button>
     </div>
   </div>
 </div>
@@ -401,6 +383,6 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="script.js?v=stylecss1"></script>
+<script src="script.js?v=passengerCards1"></script>
 </body>
 </html>

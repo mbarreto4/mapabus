@@ -2694,3 +2694,545 @@ html[data-theme="dark"] .seat-move-cancel{
     box-shadow:0 8px 18px rgba(36,87,230,.12);
   }
 }
+
+
+/* ===== Importação de lista mais compacta ===== */
+#textImportModal .modal-head h3{
+  font-size:15px;
+}
+
+#textImportModal .import-help{
+  padding:10px 11px;
+  margin-bottom:10px;
+  border-radius:11px;
+  font-size:10.5px;
+  line-height:1.45;
+}
+
+#textImportModal .import-help span{
+  color:inherit;
+}
+
+#textImportModal .text-import{
+  min-height:190px;
+  padding:11px 12px;
+  border-radius:11px;
+  font-size:11.5px;
+  line-height:1.45;
+}
+
+#textImportModal .import-preview{
+  margin-top:10px;
+  border-radius:11px;
+}
+
+#textImportModal .import-preview-head{
+  padding:8px 10px;
+  font-size:10.5px;
+}
+
+#textImportModal .import-preview-body{
+  max-height:190px;
+}
+
+#textImportModal .import-preview-row{
+  grid-template-columns:42px 1fr;
+  gap:8px;
+  padding:7px 10px;
+  font-size:10.5px;
+}
+
+#textImportModal .import-seat{
+  min-height:27px;
+  border-radius:8px;
+  font-size:10px;
+}
+
+#textImportModal .import-warning{
+  margin-top:8px;
+  padding:8px 10px;
+  font-size:9.5px;
+  line-height:1.4;
+}
+
+#textImportModal .empty{
+  padding:14px;
+  font-size:10px;
+}
+
+#textImportModal .modal-actions .btn{
+  padding:9px 11px;
+  font-size:10.5px;
+}
+
+@media(max-width:650px){
+  #textImportModal .modal-head{
+    padding:11px 12px;
+  }
+
+  #textImportModal .modal-head h3{
+    font-size:14px;
+  }
+
+  #textImportModal .modal-body{
+    padding:10px;
+  }
+
+  #textImportModal .import-help{
+    padding:8px 9px;
+    margin-bottom:8px;
+    font-size:9px;
+    line-height:1.4;
+  }
+
+  #textImportModal .text-import{
+    min-height:160px;
+    padding:9px 10px;
+    font-size:10px;
+    line-height:1.4;
+  }
+
+  #textImportModal .import-preview-head{
+    padding:7px 8px;
+    font-size:9px;
+  }
+
+  #textImportModal .import-preview-body{
+    max-height:150px;
+  }
+
+  #textImportModal .import-preview-row{
+    grid-template-columns:36px 1fr;
+    gap:6px;
+    padding:6px 8px;
+    font-size:9px;
+  }
+
+  #textImportModal .modal-actions{
+    gap:6px;
+    padding:8px 10px 10px;
+  }
+
+  #textImportModal .modal-actions .btn{
+    min-height:38px;
+    padding:7px 8px;
+    font-size:9px;
+  }
+}
+\n\n/* ===== Resumo compacto dos grupos na importação ===== */\n.import-groups-summary{\n  display:flex;\n  flex-wrap:wrap;\n  gap:7px;\n  margin-top:8px;\n}\n.import-group-summary-chip{\n  display:inline-flex;\n  align-items:center;\n  gap:7px;\n  min-height:30px;\n  padding:5px 8px 5px 10px;\n  border:1px solid var(--border);\n  border-radius:999px;\n  background:#f8faff;\n  color:var(--text);\n  font-size:10px;\n}\n.import-group-summary-chip strong{font-weight:800}\n.import-group-summary-chip b{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  min-width:22px;\n  height:22px;\n  padding:0 5px;\n  border-radius:999px;\n  background:#e7efff;\n  color:#2457b8;\n  font-size:9px;\n}\n.import-groups-note-compact{\n  margin-top:7px;\n  font-size:9px;\n  color:var(--muted);\n}\nhtml[data-theme="dark"] .import-group-summary-chip{\n  background:#172234;\n  border-color:#33445f;\n}\nhtml[data-theme="dark"] .import-group-summary-chip b{\n  background:#21345b;\n  color:#a9c3ff;\n}\n@media(max-width:650px){\n  .import-groups-summary{gap:5px;margin-top:6px}\n  .import-group-summary-chip{min-height:27px;padding:4px 7px;font-size:8.5px}\n  .import-group-summary-chip b{min-width:19px;height:19px;font-size:8px}\n  .import-groups-note-compact{font-size:8px;margin-top:5px}\n}\n
+
+/* =========================================================
+   PASSAGEIROS CADASTRADOS • VISUAL TIPO FILA DE PRIORIDADE
+   ========================================================= */
+
+.passenger-priority-list{
+  padding:14px;
+  background:rgba(247,249,253,.62);
+}
+
+.passenger-group-card{
+  overflow:hidden;
+  border:1px solid #dce3ef;
+  border-left:4px solid #4f7fd1;
+  border-radius:17px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(36,52,89,.06);
+}
+
+.passenger-group-head{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  min-height:68px;
+  padding:12px 14px;
+  border-bottom:1px solid #e5eaf3;
+  background:linear-gradient(180deg,#fff 0%,#f9fbff 100%);
+}
+
+.passenger-group-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:76px;
+  min-height:30px;
+  padding:4px 9px;
+  border-radius:10px;
+  background:#edf2fa;
+  color:#506079;
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.04em;
+}
+
+.passenger-group-heading{
+  min-width:0;
+}
+
+.passenger-group-heading strong{
+  display:block;
+  color:#1f2d46;
+  font-size:13px;
+}
+
+.passenger-group-heading span{
+  display:block;
+  margin-top:4px;
+  color:#7b879a;
+  font-size:9px;
+}
+
+.passenger-group-status{
+  padding:6px 10px;
+  border:1px solid #c6d8f4;
+  border-radius:999px;
+  background:#eaf2ff;
+  color:#315fae;
+  font-size:9px;
+  font-weight:900;
+  text-transform:capitalize;
+}
+
+.passenger-card-list{
+  background:#fbfcff;
+}
+
+.passenger-priority-row{
+  display:grid;
+  grid-template-columns:62px minmax(180px,1.35fr) minmax(250px,.9fr) auto;
+  gap:14px;
+  align-items:center;
+  min-height:78px;
+  padding:11px 14px;
+  border-bottom:1px solid #e8edf5;
+  background:#fff;
+  transition:.16s ease;
+}
+
+.passenger-priority-row:last-child{
+  border-bottom:none;
+}
+
+.passenger-priority-row:hover{
+  background:#fbfdff;
+}
+
+.passenger-priority-row.row-selected{
+  background:linear-gradient(90deg,#edf3ff 0%,#fff 38%);
+  box-shadow:inset 4px 0 0 #4f7fd1;
+}
+
+.passenger-select-seat{
+  display:grid;
+  grid-template-columns:16px 1fr;
+  grid-template-areas:
+    "check seat"
+    ". label";
+  column-gap:5px;
+  row-gap:2px;
+  align-items:center;
+  justify-items:center;
+}
+
+.passenger-select-seat .passenger-checkbox{
+  grid-area:check;
+  width:15px;
+  height:15px;
+  margin:0;
+  accent-color:#2457e6;
+}
+
+.passenger-seat-badge{
+  grid-area:seat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#edf2fa;
+  color:#385075;
+  font-size:14px;
+  font-weight:950;
+}
+
+.passenger-select-seat>span{
+  grid-area:label;
+  color:#94a0b2;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.05em;
+}
+
+.passenger-card-person{
+  min-width:0;
+}
+
+.passenger-card-name-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.passenger-card-name{
+  color:#202d43;
+  font-size:12px;
+  font-weight:900;
+}
+
+.passenger-card-extra{
+  margin-top:5px;
+  color:#8490a3;
+  font-size:9px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.passenger-trip-statuses{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.passenger-trip-status{
+  min-width:0;
+  padding:7px 9px;
+  border:1px solid #e0e6f0;
+  border-radius:11px;
+  background:#f8faff;
+}
+
+.passenger-trip-status>span{
+  display:block;
+  margin-bottom:4px;
+  color:#8a96a9;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.06em;
+}
+
+.passenger-trip-status>strong{
+  display:inline-flex;
+  align-items:center;
+  min-height:23px;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:8px;
+  font-weight:900;
+}
+
+.passenger-card-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.passenger-card-actions .quick-travel-select{
+  min-width:108px;
+  height:34px;
+}
+
+.passenger-card-actions .mini-btn{
+  min-width:58px;
+  height:34px;
+}
+
+.passenger-priority-row.row-only-return{
+  background:linear-gradient(90deg,#f7f1ff 0%,#fff 34%) !important;
+}
+
+.passenger-priority-row.row-only-return .passenger-seat-badge{
+  background:#efe5ff;
+  color:#6845a8;
+}
+
+.passenger-empty{
+  margin:0;
+}
+
+/* Tema escuro */
+html[data-theme="dark"] .passenger-priority-list{
+  background:#101827;
+}
+
+html[data-theme="dark"] .passenger-group-card{
+  background:#141d2d;
+  border-color:#2a3950;
+  border-left-color:#4f7fd1;
+}
+
+html[data-theme="dark"] .passenger-group-head{
+  background:linear-gradient(180deg,#172234 0%,#141d2d 100%);
+  border-color:#2a3950;
+}
+
+html[data-theme="dark"] .passenger-group-heading strong,
+html[data-theme="dark"] .passenger-card-name{
+  color:#e8eef9;
+}
+
+html[data-theme="dark"] .passenger-card-list,
+html[data-theme="dark"] .passenger-priority-row{
+  background:#141d2d;
+}
+
+html[data-theme="dark"] .passenger-priority-row{
+  border-color:#26354c;
+}
+
+html[data-theme="dark"] .passenger-priority-row:hover{
+  background:#172234;
+}
+
+html[data-theme="dark"] .passenger-seat-badge{
+  background:#202c40;
+  color:#c0cce0;
+}
+
+html[data-theme="dark"] .passenger-trip-status{
+  background:#101827;
+  border-color:#2d3c54;
+}
+
+html[data-theme="dark"] .passenger-priority-row.row-selected{
+  background:linear-gradient(90deg,#18294b 0%,#141d2d 38%);
+}
+
+html[data-theme="dark"] .passenger-priority-row.row-only-return{
+  background:linear-gradient(90deg,#2d2144 0%,#141d2d 34%) !important;
+}
+
+html[data-theme="dark"] .passenger-priority-row.row-only-return .passenger-seat-badge{
+  background:#392854;
+  color:#c7a8ff;
+}
+
+/* Tablet */
+@media(max-width:1050px){
+  .passenger-priority-row{
+    grid-template-columns:58px minmax(160px,1fr) minmax(210px,.85fr);
+  }
+
+  .passenger-card-actions{
+    grid-column:2/-1;
+    justify-content:flex-start;
+  }
+}
+
+/* Celular */
+@media(max-width:650px){
+  .passenger-priority-list{
+    padding:8px;
+  }
+
+  .passenger-group-card{
+    border-radius:13px;
+  }
+
+  .passenger-group-head{
+    grid-template-columns:auto 1fr auto;
+    min-height:54px;
+    padding:9px;
+    gap:8px;
+  }
+
+  .passenger-group-badge{
+    min-width:58px;
+    min-height:25px;
+    padding:4px 6px;
+    font-size:7px;
+  }
+
+  .passenger-group-heading strong{
+    font-size:11px;
+  }
+
+  .passenger-group-heading span{
+    display:none;
+  }
+
+  .passenger-group-status{
+    padding:5px 7px;
+    font-size:7px;
+  }
+
+  .passenger-priority-row{
+    grid-template-columns:48px minmax(0,1fr);
+    gap:7px;
+    min-height:64px;
+    padding:9px 8px;
+  }
+
+  .passenger-select-seat{
+    grid-row:1/span 3;
+  }
+
+  .passenger-seat-badge{
+    width:33px;
+    height:33px;
+    border-radius:10px;
+    font-size:12px;
+  }
+
+  .passenger-select-seat>span{
+    font-size:6px;
+  }
+
+  .passenger-card-name{
+    font-size:11px;
+  }
+
+  .passenger-card-extra{
+    display:none;
+  }
+
+  .passenger-trip-statuses{
+    grid-column:2;
+    display:flex;
+    gap:5px;
+  }
+
+  .passenger-trip-status{
+    flex:1;
+    padding:5px 6px;
+  }
+
+  .passenger-trip-status>span{
+    margin-bottom:3px;
+    font-size:6px;
+  }
+
+  .passenger-trip-status>strong{
+    min-height:20px;
+    padding:3px 5px;
+    font-size:7px;
+  }
+
+  .passenger-card-actions{
+    grid-column:2;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    width:100%;
+    gap:5px;
+  }
+
+  .passenger-card-actions .quick-travel-select{
+    grid-column:1/-1;
+    width:100%;
+    min-width:0;
+    height:33px;
+    font-size:9px;
+  }
+
+  .passenger-card-actions .mini-btn{
+    width:100%;
+    min-width:0;
+    height:32px;
+    padding:5px 4px;
+    font-size:8px;
+  }
+}
