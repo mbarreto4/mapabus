@@ -2620,3 +2620,77 @@ html[data-theme="dark"] .seat-move-cancel{
   background:#dce5f3;
   border-color:#c9d4e5;
 }
+
+
+/* =====================================================
+   CONFIRMAÇÃO RÁPIDA NAS POLTRONAS
+   toque = confirmar | segurar = opções
+   ===================================================== */
+
+.seat{
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+.seat-confirm-mark{
+  position:absolute;
+  right:5px;
+  top:5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:17px;
+  height:17px;
+  border-radius:999px;
+  background:#16885a;
+  color:#fff;
+  font-size:10px;
+  font-weight:950;
+  line-height:1;
+  box-shadow:0 3px 8px rgba(23,110,71,.24);
+  pointer-events:none;
+}
+
+/* Na volta o confirmado continua facilmente identificável */
+.seat.returned .seat-confirm-mark{
+  background:#2457b8;
+}
+
+/* "Só volta" permanece roxo, mas o ✓ deixa claro que já confirmou */
+.seat.travel-volta.seat-confirmed{
+  box-shadow:
+    inset 0 0 0 2px rgba(104,69,168,.18),
+    0 7px 16px rgba(104,69,168,.13) !important;
+}
+
+@media(max-width:700px){
+  .seat{
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .seat-confirm-mark{
+    width:14px;
+    height:14px;
+    right:2px;
+    top:2px;
+    font-size:8px;
+  }
+
+  /* No celular o arrastar por toque não é mais a ação principal. */
+  .seat .drag-handle{
+    display:none !important;
+  }
+}
+
+
+/* ===== Desktop: clique rápido / duplo clique ===== */
+@media(hover:hover) and (pointer:fine){
+  .seat:not(.free){
+    cursor:pointer;
+  }
+  .seat:not(.free):hover{
+    box-shadow:0 8px 18px rgba(36,87,230,.12);
+  }
+}
